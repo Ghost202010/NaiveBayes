@@ -1,16 +1,13 @@
 import pandas
-import numpy as np
+import math
 # Training
 
 
 def fit(x_train, y_train):
-    filename = 'Datasets\libro1.csv'  # Dataset filename
-    dataset = pandas.read_csv(filename, skipinitialspace=True)
-    print(dataset)
     unique_class_values, frequency_table = calculate_frecuency_table(
         x_train, y_train)
     verosimilitude_table = calculate_verosimilitude(
-        frequency_table, unique_class_values)
+        frequency_table, x_train, y_train)
 
     return verosimilitude_table
 
@@ -26,52 +23,71 @@ def calculate_frecuency_table(x_train, y_train):
     for column in all_data.columns:
         if column == y_train.name:
             break
-        # Remove spaces per column
-        all_data[column] = all_data[column].astype(str).str.strip()
-        # Frecuency table per column
-        # groupby is a Pandas' function, it helps to group data
-        # With size(), the functions returns a "Pandas Series" with the number of repeated columns
-        # Unstack returns a dataframe, and fill_value helps us to fill missing values
-        column_frecuency = all_data.groupby(
-            [column, y_train.name]).size().unstack(fill_value=0)
-        column_frecuency = column_frecuency.stack()
-        for index, a in column_frecuency.items():
-            column_frecuency[index] += 1
-        column_frecuency = column_frecuency.unstack(fill_value=0)
-        # orient='index' is used to return a dictionary by instances (rows)
-        tablas_de_frecuencia[column] = column_frecuency.to_dict(orient='index')
+        if all_data[column].dtype in [int, float]:
+            tablas_de_frecuencia[column] = all_data[column]
+        else:
+            all_data[column] = all_data[column].astype(str).str.strip()
+            # Frecuency table per column
+            # groupby is a Pandas' function, it helps to group data
+            # With size(), the functions returns a "Pandas Series" with the number of repeated columns
+            # Unstack returns a dataframe, and fill_value helps us to fill missing values
+            column_frecuency = all_data.groupby(
+                [column, y_train.name]).size().unstack(fill_value=0)
+            column_frecuency = column_frecuency.stack()
+            for index, a in column_frecuency.items():
+                column_frecuency[index] += 1
+            column_frecuency = column_frecuency.unstack(fill_value=0)
+            # orient='index' is used to return a dictionary by instances (rows)
+            tablas_de_frecuencia[column] = column_frecuency.to_dict(
+                orient='index')
 
     return unique_classes, tablas_de_frecuencia
 
 
-def calculate_verosimilitude(frecuency_table, unique_class_values):
+def calculate_verosimilitude(frecuency_table, x_train, y_train):
     # This functions expects a dictionary as a parameter with the following structure:
     # {Outlook:{Sunny:{Yes:2,no:3}, Overcast:{Yes:3,No:1}},Temp:{Hot:{Yes:2,No:2},Mild:{Yes:3,No:2}}}
     verosimilitude = {}
     temp_class_value = {}
+    classes = y_train.astype(str).str.replace(' ', '')
+    unique_class_values = classes.unique()
+    # All data (class and attributes)
+    all_data = pandas.concat(
+        [x_train, classes], axis=1)
     # first, we get the atributes (columns)
-    for attributes in frecuency_table:
-        verosimilitude[attributes] = {}
-        sum_class = 0
-        # Over every atribute we get it's possibles values
-        for one_class in unique_class_values:
-            sum_class = 0
-            if sum_class <= 0:
-                sum_class = sum(
-                    values_attributes[one_class] for values_attributes in frecuency_table[attributes].values())
-            for value_attribute in frecuency_table[attributes]:
-
-                if value_attribute not in verosimilitude[attributes].keys():
-                    verosimilitude[attributes][value_attribute] = {}
-                    temp_class_value[value_attribute] = {}
-
-                verosimilitude[attributes][value_attribute][one_class] = frecuency_table[attributes][value_attribute][one_class] / sum_class
+    for attribute in x_train:
+        verosimilitude[attribute] = {}
+        if all_data[attribute].dtype in [int, float]:
+            continuous_verosimilitude()
+        else:
+            verosimilitude[attribute] = discrete_verosimilitude(
+                frecuency_table[attribute], unique_class_values)
     # This is a model output example (It's a dictionary)
     # {Outlook:{Sunny:Yes,Rainy:No,Overcast:Yes}}
+    # {Outlook:{Sunny:{Yes:{media:3.2,desviaconEstandar:0.2},no:3}, Overcast:{Yes:3,No:1}},Temp:{Hot:{Yes:2,No:2},Mild:{Yes:3,No:2}}}
+    print(verosimilitude)
     return verosimilitude
 
 
-def discrete_disimilitude(values_attribute):
+def discrete_verosimilitude(attribute, unique_class_values):
+    sum_class = 0
+    # Over every atribute we get it's possibles values
+    verosimilitude = {}
+    temp_class_value = {}
+    for one_class in unique_class_values:
+        sum_class = 0
+        if sum_class <= 0:
+            sum_class = sum(
+                values_attributes[one_class] for values_attributes in attribute.values())
+        for value_attribute in attribute:
+            if value_attribute not in verosimilitude.keys():
+                verosimilitude[value_attribute] = {}
+                temp_class_value[value_attribute] = {}
+            verosimilitude[value_attribute][one_class] = attribute[value_attribute][one_class] / sum_class
+    return verosimilitude
+
+
+def continuous_verosimilitude():
     pass
 
 
