@@ -18,9 +18,9 @@ def main():
     y_test = x_test[class_column_name]
     x_test = x_test.drop(columns=[class_column_name])
 
-    verosimilitude_table = NaiveBayes.fit(x_train, y_train)
-    print(verosimilitude_table)
-    # total_tests, results = NaiveBayes.tests(x_test, y_test, model)
+    verosimilitude_table = NaiveBayes.fit(
+        x_train, y_train)
+    total_tests = NaiveBayes.tests(x_train, y_train, verosimilitude_table)
     # NaiveBayes.print_results(results, model, total_tests)
 
 
