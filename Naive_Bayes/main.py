@@ -4,8 +4,10 @@ import pandas
 
 def main():
     filename = 'Datasets\golf-dataset-categorical.csv'  # Dataset filename
+    filename = 'Datasets\Iris.csv'
     train_sample_size = 1  # Training percentage
-    class_column_name = 'Play'
+    # class_column_name = 'Play'
+    class_column_name = 'iris'
     dataset = pandas.read_csv(filename, skipinitialspace=True)
 
     x_train = dataset.sample(frac=train_sample_size)
