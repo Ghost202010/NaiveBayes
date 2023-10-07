@@ -21,7 +21,6 @@ def main():
     verosimilitude_table = NaiveBayes.fit(
         x_train, y_train)
     total_tests = NaiveBayes.tests(x_train, y_train, verosimilitude_table)
-    # NaiveBayes.print_results(results, model, total_tests)
 
 
 if __name__ == '__main__':

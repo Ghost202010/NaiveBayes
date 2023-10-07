@@ -130,14 +130,15 @@ def tests(x_test, y_test, verosimilitude):
     all_data = pandas.concat(
         [x_test, classes], axis=1)
     normal_distribution = {}
-    contador = {}
+    success = 0
+    total_test = len(all_data)
     for attribute in all_data:
         if all_data[attribute].dtype not in [int, float]:
             all_data[attribute] = all_data[attribute].astype(
                 str).str.strip()
     for index, row in all_data.iterrows():
         normal_distribution[index] = {}
-        contador[index] = {}
+
         for attribute in all_data.columns:
             for one_class in unique_class_values:
                 if all_data[attribute].dtype in [int, float]:
@@ -155,10 +156,34 @@ def tests(x_test, y_test, verosimilitude):
                         list_keys = list(value_attribute_keys)
                         if all(key in unique_class_values for key in list_keys):
                             normal_distribution[index][one_class] *= verosimilitude[attribute][one_class]
+
                         else:
                             normal_distribution[index][one_class] *= verosimilitude[attribute][row[attribute]][one_class]
-        print(max(normal_distribution[index].values()))
+        max_normal_distribution = list(normal_distribution[index].values())[0]
+        key_max_normal_distribution = list(
+            normal_distribution[index].keys())[0]
+        for index_keys in normal_distribution[index].keys():
+            if normal_distribution[index][index_keys] > max_normal_distribution:
+                max_normal_distribution = normal_distribution[index][index_keys]
+                key_max_normal_distribution = index_keys
+        if all_data.loc[index][classes.name] == key_max_normal_distribution:
+            success += 1
+
+        print('Clase esperada')
+        print(all_data.loc[index][classes.name])
+        print('Clase estimada')
+        print(key_max_normal_distribution)
+        print('**************************')
+    print('aciertos')
+    print(success)
+    print('Porcentaje de aciertos')
+    print((success*100)/total_test)
 
 
-def print_results(succes, model, total_tests):
-    pass
+def print_debug(valor_multiplicado, valor_a_multiplicarse, atributo, clase):
+    print('atributo: ' + atributo)
+    print('clase: ' + clase)
+    print('valor actual')
+    print(valor_multiplicado)
+    print('valor almacenado')
+    print(valor_a_multiplicarse)
