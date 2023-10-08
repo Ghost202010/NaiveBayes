@@ -3,9 +3,8 @@ import pandas
 
 
 def main():
-    filename = 'Datasets\golf-dataset-categorical.csv'  # Dataset filename
-    filename = 'Datasets\Iris.csv'
-    train_sample_size = 1  # Training percentage
+    filename = 'Datasets\Iris_file.csv'
+    train_sample_size = 0.7  # Training percentage
     # class_column_name = 'Play'
     class_column_name = 'iris'
     dataset = pandas.read_csv(filename, skipinitialspace=True)
@@ -20,7 +19,7 @@ def main():
 
     verosimilitude_table = NaiveBayes.fit(
         x_train, y_train)
-    total_tests = NaiveBayes.tests(x_train, y_train, verosimilitude_table)
+    total_tests = NaiveBayes.tests(x_test, y_test, verosimilitude_table)
 
 
 if __name__ == '__main__':
