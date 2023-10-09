@@ -1,6 +1,6 @@
 import pandas
 from scipy.stats import norm
-import time
+
 
 # Training
 def fit(x_train, y_train):
@@ -117,7 +117,7 @@ def std_continuous_values(x_train, y_train, attribute):
     std_column = std_column.to_dict()
     return std_column
 
-# 
+# main function to calculate test values
 def tests(x_test, y_test, verosimilitude):
     classes = y_test.astype(str).str.strip()
     unique_class_values = classes.unique()
